@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package tombola_as_a_service_cbr;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -10,134 +5,80 @@ import com.sun.net.httpserver.HttpHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
-/**
- *
- * @author delfo
- */
-
-
 public class GetHandler implements HttpHandler {
-    
-    // Istanza Gson configurata per pretty printing
-    private final Gson gson = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        
-        // Verifica che sia una richiesta GET
+        // Regola REST: GET è solo per lettura
         if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
-            inviaErrore(exchange, 405, "Metodo non consentito. Usa GET");
+            inviaRisposta(exchange, 405, generaMessaggio("Metodo non consentito"));
             return;
         }
         
         try {
-            // Estrae i parametri dalla query string
-            Map<String, String> parametri = estraiParametri(exchange.getRequestURI().getQuery());
-            
-            // Validazione parametri
-            if (!parametri.containsKey("operando1") || 
-                !parametri.containsKey("operando2") || 
-                !parametri.containsKey("operatore")) {
-                inviaErrore(exchange, 400, 
-                    "Parametri mancanti. Necessari: operando1, operando2, operatore");
+            Map<String, String> params = estraiParametri(exchange.getRequestURI().getQuery());
+            String risorsa = params.getOrDefault("risorsa", ""); // Es: "numeri", "stato", "vincite"
+            String idTom = params.get("id_tombolata");
+
+            if (idTom == null) {
+                inviaRisposta(exchange, 400, generaMessaggio("Manca id_tombolata"));
                 return;
             }
+
+            Object datiResponse;
+            switch (risorsa) {
+                case "ultimo_numero": //
+                    datiResponse = "Simulazione: Numero 42 (estratto alle 10:15)";
+                    break;
+                case "ultimi_cinque": //
+                    datiResponse = new int[]{42, 12, 88, 5, 23};
+                    break;
+                case "tabellone": //
+                    datiResponse = "Lista completa numeri estratti per la sessione " + idTom;
+                    break;
+                case "stato": //
+                    datiResponse = "Stato attuale: ATTIVA";
+                    break;
+                default:
+                    inviaRisposta(exchange, 404, generaMessaggio("Risorsa non trovata"));
+                    return;
+            }
+
+            inviaRisposta(exchange, 200, gson.toJson(datiResponse));
             
-            // Parsing dei valori
-            double operando1 = Double.parseDouble(parametri.get("operando1"));
-            double operando2 = Double.parseDouble(parametri.get("operando2"));
-            String operatore = parametri.get("operatore");
-            
-            // Esegue il calcolo
-            double risultato = Tombola_as_a_Service_CBR.calcola(operando1, operando2, operatore);
-            
-            // Crea l'oggetto risposta
-            TombolataResponse response = new TombolataResponse(
-                operando1,
-                operando2,
-                operatore,
-                risultato
-            );
-            
-            // GSON converte automaticamente l'oggetto Java in JSON
-            String jsonRisposta = gson.toJson(response);
-            
-            inviaRisposta(exchange, 200, jsonRisposta);
-            
-        } catch (NumberFormatException e) {
-            inviaErrore(exchange, 400, "Operandi non validi. Devono essere numeri");
-        } catch (IllegalArgumentException e) {
-            inviaErrore(exchange, 400, e.getMessage());
         } catch (Exception e) {
-            inviaErrore(exchange, 500, "Errore interno del server: " + e.getMessage());
+            inviaRisposta(exchange, 500, generaMessaggio("Errore Server: " + e.getMessage()));
         }
     }
-    
-    /**
-     * Estrae i parametri dalla query string
-     */
+
     private Map<String, String> estraiParametri(String query) {
-        Map<String, String> parametri = new HashMap<>();
-        
-        if (query == null || query.isEmpty()) {
-            return parametri;
-        }
-        
-        String[] coppie = query.split("&");
-        for (String coppia : coppie) {
-            String[] keyValue = coppia.split("=");
-            if (keyValue.length == 2) {
-                try {
-                    String chiave = URLDecoder.decode(keyValue[0], "UTF-8");
-                    String valore = URLDecoder.decode(keyValue[1], "UTF-8");
-                    parametri.put(chiave, valore);
-                } catch (Exception e) {
-                    // Ignora parametri malformati
-                }
+        Map<String, String> map = new HashMap<>();
+        if (query != null) {
+            for (String p : query.split("&")) {
+                String[] kv = p.split("=");
+                if (kv.length == 2) map.put(kv[0], URLDecoder.decode(kv[1], StandardCharsets.UTF_8));
             }
         }
-        
-        return parametri;
+        return map;
     }
-    
-    /**
-     * Invia una risposta di successo
-     */
-    private void inviaRisposta(HttpExchange exchange, int codice, String jsonRisposta) 
-            throws IOException {
-        
-        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
-        exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-        
-        byte[] bytes = jsonRisposta.getBytes(StandardCharsets.UTF_8);
-        exchange.sendResponseHeaders(codice, bytes.length);
-        
-        OutputStream os = exchange.getResponseBody();
-        os.write(bytes);
-        os.close();
+
+    private void inviaRisposta(HttpExchange exchange, int code, String json) throws IOException {
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        byte[] b = json.getBytes(StandardCharsets.UTF_8);
+        exchange.sendResponseHeaders(code, b.length);
+        exchange.getResponseBody().write(b);
+        exchange.getResponseBody().close();
     }
-    
-    /**
-     * Invia una risposta di errore in formato JSON
-     */
-    private void inviaErrore(HttpExchange exchange, int codice, String messaggio) 
-            throws IOException {
-        
-        Map<String, Object> errore = new HashMap<>();
-        errore.put("errore", messaggio);
-        errore.put("status", codice);
-        
-        String jsonErrore = gson.toJson(errore);
-        inviaRisposta(exchange, codice, jsonErrore);
+
+    private String generaMessaggio(String msg) {
+        Map<String, String> m = new HashMap<>();
+        m.put("status", msg);
+        return gson.toJson(m);
     }
 }
