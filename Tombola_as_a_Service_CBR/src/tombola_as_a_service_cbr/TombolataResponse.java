@@ -9,66 +9,149 @@ package tombola_as_a_service_cbr;
  * @author delfo
  */
 public class TombolataResponse {
-    private double operando1;
-    private double operando2;
-    private String operatore;
-    private double risultato;
-    private String operazione;
-    
+ 
+    public int id;
+    public String nome;
+    public int idGestore;
+    public String stato;
+    public String dataInizio;
+    public String dataFine;
+    public String dataFineAssegnazioneCartelle;
+    public String modalitaAutenticazione;
+    public int maxCartellePerUtente;
+    public String operazioniConsentite;
+ 
     // Costruttore vuoto necessario per GSON
     public TombolataResponse() {
     }
-    
-    // Costruttore con parametri
-    public TombolataResponse(double operando1, double operando2, 
-                             String operatore, double risultato) {
-        this.operando1 = operando1;
-        this.operando2 = operando2;
-        this.operatore = operatore;
-        this.risultato = risultato;
-        this.operazione = String.format("%.2f %s %.2f = %.2f", 
-            operando1, operatore, operando2, risultato);
+ 
+    public TombolataResponse(int id, String nome, int idGestore, String stato,
+                             String dataInizio, String dataFine,
+                             String dataFineAssegnazioneCartelle,
+                             String modalitaAutenticazione,
+                             int maxCartellePerUtente) {
+        this.id = id;
+        this.nome = nome;
+        this.idGestore = idGestore;
+        this.stato = stato;
+        this.dataInizio = dataInizio;
+        this.dataFine = dataFine;
+        this.dataFineAssegnazioneCartelle = dataFineAssegnazioneCartelle;
+        this.modalitaAutenticazione = modalitaAutenticazione;
+        this.maxCartellePerUtente = maxCartellePerUtente;
+        this.operazioniConsentite = calcolaOperazioniConsentite(stato);
     }
-    
-    // Getter
-    public double getOperando1() {
-        return operando1;
+ 
+    /**
+     * Calcola la descrizione delle operazioni consentite in base allo stato corrente.
+     * Segue la tabella definita nelle specifiche TaaS.
+     *
+     * @param stato lo stato corrente della tombolata
+     * @return la descrizione delle operazioni permesse
+     */
+    private String calcolaOperazioniConsentite(String stato) {
+        if (stato == null) return "";
+        switch (stato.toUpperCase().trim()) {
+            case "CREATA":    return "Modifica configurazione, aggiunta cartelle";
+            case "APERTA":    return "Iscrizione utenti, assegnazione cartelle";
+            case "ATTIVA":    return "Estrazione numeri, controllo vincite";
+            case "TERMINATA": return "Sola lettura; nessuna operazione di scrittura";
+            default:          return "";
+        }
     }
-    
-    public double getOperando2() {
-        return operando2;
+ 
+    public int getId() {
+        return id;
     }
-    
-    public String getOperatore() {
-        return operatore;
+ 
+    public void setId(int id) {
+        this.id = id;
     }
-    
-    public double getRisultato() {
-        return risultato;
+ 
+    public String getNome() {
+        return nome;
     }
-    
-    public String getOperazione() {
-        return operazione;
+ 
+    public void setNome(String nome) {
+        this.nome = nome;
     }
-    
-    // Setter
-    public void setOperando1(double operando1) {
-        this.operando1 = operando1;
+ 
+    public int getIdGestore() {
+        return idGestore;
     }
-    
-    public void setOperando2(double operando2) {
-        this.operando2 = operando2;
+ 
+    public void setIdGestore(int idGestore) {
+        this.idGestore = idGestore;
     }
-    
-    public void setOperatore(String operatore) {
-        this.operatore = operatore;
+ 
+    public String getStato() {
+        return stato;
     }
-    
-    public void setRisultato(double risultato) {
-        this.risultato = risultato;
+ 
+    public void setStato(String stato) {
+        this.stato = stato;
+        this.operazioniConsentite = calcolaOperazioniConsentite(stato);
     }
-    
-    public void setOperazione(String operazione) {
-        this.operazione = operazione;
+ 
+    public String getDataInizio() {
+        return dataInizio;
+    }
+ 
+    public void setDataInizio(String dataInizio) {
+        this.dataInizio = dataInizio;
+    }
+ 
+    public String getDataFine() {
+        return dataFine;
+    }
+ 
+    public void setDataFine(String dataFine) {
+        this.dataFine = dataFine;
+    }
+ 
+    public String getDataFineAssegnazioneCartelle() {
+        return dataFineAssegnazioneCartelle;
+    }
+ 
+    public void setDataFineAssegnazioneCartelle(String dataFineAssegnazioneCartelle) {
+        this.dataFineAssegnazioneCartelle = dataFineAssegnazioneCartelle;
+    }
+ 
+    public String getModalitaAutenticazione() {
+        return modalitaAutenticazione;
+    }
+ 
+    public void setModalitaAutenticazione(String modalitaAutenticazione) {
+        this.modalitaAutenticazione = modalitaAutenticazione;
+    }
+ 
+    public int getMaxCartellePerUtente() {
+        return maxCartellePerUtente;
+    }
+ 
+    public void setMaxCartellePerUtente(int maxCartellePerUtente) {
+        this.maxCartellePerUtente = maxCartellePerUtente;
+    }
+ 
+    public String getOperazioniConsentite() {
+        return operazioniConsentite;
+    }
+ 
+    public void setOperazioniConsentite(String operazioniConsentite) {
+        this.operazioniConsentite = operazioniConsentite;
+    }
+ 
+    @Override
+    public String toString() {
+        return "TombolataResponse{ id=" + id
+                + ", nome=" + nome
+                + ", idGestore=" + idGestore
+                + ", stato=" + stato
+                + ", dataInizio=" + dataInizio
+                + ", dataFine=" + dataFine
+                + ", dataFineAssegnazioneCartelle=" + dataFineAssegnazioneCartelle
+                + ", modalitaAutenticazione=" + modalitaAutenticazione
+                + ", maxCartellePerUtente=" + maxCartellePerUtente
+                + ", operazioniConsentite=" + operazioniConsentite + '}';
     }
 }

@@ -9,53 +9,108 @@ package tombola_as_a_service_cbr;
  * @author delfo
  */
 public class TombolataRequest {
-    private double operando1;
-    private double operando2;
-    private String operatore;
-    
+ 
+    public String nome;
+    public String idGestore;
+    public String stato;
+    public String dataInizio;
+    public String dataFine;
+    public String dataFineAssegnazioneCartelle;
+    public String modalitaAutenticazione;
+    public String maxCartellePerUtente;
+ 
     // Costruttore vuoto necessario per GSON
     public TombolataRequest() {
     }
-    
-    // Costruttore con parametri
-    public TombolataRequest(double operando1, double operando2, String operatore) {
-        this.operando1 = operando1;
-        this.operando2 = operando2;
-        this.operatore = operatore;
+ 
+    public TombolataRequest(String nome, String idGestore, String stato,
+                            String dataInizio, String dataFine,
+                            String dataFineAssegnazioneCartelle,
+                            String modalitaAutenticazione,
+                            String maxCartellePerUtente) {
+        this.nome = nome;
+        this.idGestore = idGestore;
+        this.stato = stato;
+        this.dataInizio = dataInizio;
+        this.dataFine = dataFine;
+        this.dataFineAssegnazioneCartelle = dataFineAssegnazioneCartelle;
+        this.modalitaAutenticazione = modalitaAutenticazione;
+        this.maxCartellePerUtente = maxCartellePerUtente;
     }
-    
-    // Getter
-    public double getOperando1() {
-        return operando1;
+ 
+    public String getNome() {
+        return nome;
     }
-    
-    public double getOperando2() {
-        return operando2;
+ 
+    public void setNome(String nome) {
+        this.nome = nome;
     }
-    
-    public String getOperatore() {
-        return operatore;
+ 
+    public String getIdGestore() {
+        return idGestore;
     }
-    
-    // Setter
-    public void setOperando1(double operando1) {
-        this.operando1 = operando1;
+ 
+    public void setIdGestore(String idGestore) {
+        this.idGestore = idGestore;
     }
-    
-    public void setOperando2(double operando2) {
-        this.operando2 = operando2;
+ 
+    public String getStato() {
+        return stato;
     }
-    
-    public void setOperatore(String operatore) {
-        this.operatore = operatore;
+ 
+    public void setStato(String stato) {
+        this.stato = stato;
     }
-    
+ 
+    public String getDataInizio() {
+        return dataInizio;
+    }
+ 
+    public void setDataInizio(String dataInizio) {
+        this.dataInizio = dataInizio;
+    }
+ 
+    public String getDataFine() {
+        return dataFine;
+    }
+ 
+    public void setDataFine(String dataFine) {
+        this.dataFine = dataFine;
+    }
+ 
+    public String getDataFineAssegnazioneCartelle() {
+        return dataFineAssegnazioneCartelle;
+    }
+ 
+    public void setDataFineAssegnazioneCartelle(String dataFineAssegnazioneCartelle) {
+        this.dataFineAssegnazioneCartelle = dataFineAssegnazioneCartelle;
+    }
+ 
+    public String getModalitaAutenticazione() {
+        return modalitaAutenticazione;
+    }
+ 
+    public void setModalitaAutenticazione(String modalitaAutenticazione) {
+        this.modalitaAutenticazione = modalitaAutenticazione;
+    }
+ 
+    public String getMaxCartellePerUtente() {
+        return maxCartellePerUtente;
+    }
+ 
+    public void setMaxCartellePerUtente(String maxCartellePerUtente) {
+        this.maxCartellePerUtente = maxCartellePerUtente;
+    }
+ 
     @Override
     public String toString() {
-        return "OperazioneRequest{" +
-                "operando1=" + operando1 +
-                ", operando2=" + operando2 +
-                ", operatore='" + operatore + '\'' +
-                '}';
+        return "TombolataRequest{ nome=" + nome
+                + ", idGestore=" + idGestore
+                + ", stato=" + stato
+                + ", dataInizio=" + dataInizio
+                + ", dataFine=" + dataFine
+                + ", dataFineAssegnazioneCartelle=" + dataFineAssegnazioneCartelle
+                + ", modalitaAutenticazione=" + modalitaAutenticazione
+                + ", maxCartellePerUtente=" + maxCartellePerUtente + '}';
     }
 }
