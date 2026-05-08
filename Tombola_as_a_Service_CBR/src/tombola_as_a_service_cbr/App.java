@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 
-package serverrest;
+package tombola_as_a_service_cbr;
 
 /**
  * Entry point dell'applicazione Calcolatrice REST

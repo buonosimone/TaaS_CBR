@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 
-package serverrest;
+package tombola_as_a_service_cbr;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -59,7 +59,7 @@ public class GetHandler implements HttpHandler {
             String operatore = parametri.get("operatore");
             
             // Esegue il calcolo
-            double risultato = TombolataService.calcola(operando1, operando2, operatore);
+            double risultato = Tombola_as_a_Service_CBR.calcola(operando1, operando2, operatore);
             
             // Crea l'oggetto risposta
             TombolataResponse response = new TombolataResponse(

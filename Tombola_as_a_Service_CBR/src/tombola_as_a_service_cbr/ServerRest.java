@@ -1,4 +1,4 @@
-package serverrest;
+package tombola_as_a_service_cbr;
 
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpExchange;
@@ -27,14 +27,8 @@ public class ServerRest {
             // =======================
             // === API V1 ============
             // =======================
-            server.createContext("/api/v1/calcola/get", new GetHandlerV1());
-            server.createContext("/api/v1/calcola/post", new PostHandlerV1());
-
-            // =======================
-            // === LEGACY → V1 =======
-            // =======================
-            server.createContext("/api/calcola/get", new GetHandlerV1());
-            server.createContext("/api/calcola/post", new PostHandlerV1());
+            server.createContext("/api/v1/calcola/get", new GetHandler());
+            server.createContext("/api/v1/calcola/post", new PostHandler());
 
             // Endpoint di benvenuto
             server.createContext("/", ServerRest::gestisciBenvenuto);
