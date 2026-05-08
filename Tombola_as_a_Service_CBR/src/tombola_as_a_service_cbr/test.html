@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Calcolatrice API</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        input, select, button { margin: 10px 0; padding: 8px; }
+        #risultato { margin-top: 20px; padding: 15px; 
+                     background: #f0f0f0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Test Calcolatrice REST API</h1>
+    
+    <div>
+        <label>Operando 1:</label>
+        <input type="number" id="op1" value="10" step="0.01">
+    </div>
+    
+    <div>
+        <label>Operatore:</label>
+        <select id="operatore">
+            <option value="SOMMA">SOMMA (+)</option>
+            <option value="SOTTRAZIONE">SOTTRAZIONE (-)</option>
+            <option value="MOLTIPLICAZIONE">MOLTIPLICAZIONE (*)</option>
+            <option value="DIVISIONE">DIVISIONE (/)</option>
+        </select>
+    </div>
+    
+    <div>
+        <label>Operando 2:</label>
+        <input type="number" id="op2" value="5" step="0.01">
+    </div>
+    
+    <div>
+        <button onclick="calcolaPOST()">Calcola (POST)</button>
+        <button onclick="calcolaGET()">Calcola (GET)</button>
+    </div>
+    
+    <div id="risultato"></div>
+    
+    <script>
+        async function calcolaPOST() {
+            const data = {
+                operando1: parseFloat(document.getElementById('op1').value),
+                operando2: parseFloat(document.getElementById('op2').value),
+                operatore: document.getElementById('operatore').value
+            };
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/calcola/post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                mostraRisultato(result);
+            } catch (error) {
+                document.getElementById('risultato').innerHTML = 
+                    '<strong>Errore:</strong> ' + error.message;
+            }
+        }
+        
+        async function calcolaGET() {
+            const op1 = document.getElementById('op1').value;
+            const op2 = document.getElementById('op2').value;
+            const operatore = document.getElementById('operatore').value;
+            
+            const url = `http://localhost:8080/api/calcola/get?operando1=${op1}&operando2=${op2}&operatore=${operatore}`;
+            
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+                mostraRisultato(result);
+            } catch (error) {
+                document.getElementById('risultato').innerHTML = 
+                    '<strong>Errore:</strong> ' + error.message;
+            }
+        }
+        
+        function mostraRisultato(result) {
+            if (result.errore) {
+                document.getElementById('risultato').innerHTML = 
+                    '<strong style="color:red">Errore:</strong> ' + result.errore;
+            } else {
+                document.getElementById('risultato').innerHTML = 
+                    '<strong>Risultato:</strong> ' + result.operazione + 
+                    '<br><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            }
+        }
+    </script>
+</body>
+</html>
