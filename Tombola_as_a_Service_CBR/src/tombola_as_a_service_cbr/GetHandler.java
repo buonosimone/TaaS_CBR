@@ -59,10 +59,10 @@ public class GetHandler implements HttpHandler {
             String operatore = parametri.get("operatore");
             
             // Esegue il calcolo
-            double risultato = CalcolatriceService.calcola(operando1, operando2, operatore);
+            double risultato = TombolataService.calcola(operando1, operando2, operatore);
             
             // Crea l'oggetto risposta
-            OperazioneResponse response = new OperazioneResponse(
+            TombolataResponse response = new TombolataResponse(
                 operando1,
                 operando2,
                 operatore,

@@ -49,7 +49,7 @@ public class PostHandler implements HttpHandler {
             );
             
             // GSON converte automaticamente il JSON in oggetto Java
-            OperazioneRequest request = gson.fromJson(reader, OperazioneRequest.class);
+            TombolataRequest request = gson.fromJson(reader, TombolataRequest.class);
             reader.close();
             
             // Validazione
@@ -64,14 +64,14 @@ public class PostHandler implements HttpHandler {
             }
             
             // Esegue il calcolo
-            double risultato = CalcolatriceService.calcola(
+            double risultato = TombolataService.calcola(
                 request.getOperando1(),
                 request.getOperando2(),
                 request.getOperatore()
             );
             
             // Crea l'oggetto risposta
-            OperazioneResponse response = new OperazioneResponse(
+            TombolataResponse response = new TombolataResponse(
                 request.getOperando1(),
                 request.getOperando2(),
                 request.getOperatore(),

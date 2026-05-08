@@ -8,17 +8,17 @@ package serverrest;
  *
  * @author delfo
  */
-public class OperazioneRequest {
+public class TombolataRequest {
     private double operando1;
     private double operando2;
     private String operatore;
     
     // Costruttore vuoto necessario per GSON
-    public OperazioneRequest() {
+    public TombolataRequest() {
     }
     
     // Costruttore con parametri
-    public OperazioneRequest(double operando1, double operando2, String operatore) {
+    public TombolataRequest(double operando1, double operando2, String operatore) {
         this.operando1 = operando1;
         this.operando2 = operando2;
         this.operatore = operatore;
