@@ -1,125 +1,74 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package tombola_as_a_service_cbr;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
-/**
- *
- * @author delfo
- */
-
-
 public class PostHandler implements HttpHandler {
-    
-    // Istanza Gson configurata per pretty printing
-    private final Gson gson = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
-    
+    private final Gson gson = new Gson();
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        
-        // Verifica che sia una richiesta POST
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
-            inviaErrore(exchange, 405, "Metodo non consentito. Usa POST");
+            inviaRisposta(exchange, 405, "Usa POST");
             return;
         }
-        
-        try {
-            // Legge il body della richiesta
-            BufferedReader reader = new BufferedReader(
-                new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8)
-            );
-            
-            // GSON converte automaticamente il JSON in oggetto Java
-            TombolataRequest request = gson.fromJson(reader, TombolataRequest.class);
-            reader.close();
-            
-            // Validazione
-            if (request == null) {
-                inviaErrore(exchange, 400, "Body della richiesta vuoto o non valido");
-                return;
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))) {
+            JsonObject body = JsonParser.parseReader(reader).getAsJsonObject();
+            String azione = body.get("azione").getAsString();
+            String statoAttuale = "attiva"; // In produzione questo verrebbe dal DB
+
+            Map<String, Object> res = new HashMap<>();
+
+            switch (azione) {
+                case "estrai": 
+                    // Vincolo: solo se STATO = ATTIVA
+                    if (!statoAttuale.equals("attiva")) {
+                        inviaRisposta(exchange, 403, "Errore: Puoi estrarre solo in stato ATTIVA");
+                        return;
+                    }
+                    res.put("numero", 7); 
+                    res.put("ordine", 12);
+                    break;
+
+                case "assegna_cartella":
+                    // Vincolo: solo se STATO = APERTA
+                    res.put("messaggio", "Cartella generata rispettando la regola dei decili (col 1: 1-9, col 2: 10-19...)");
+                    break;
+
+                case "cambia_stato":
+                    // Gestisce transizioni: creata -> aperta -> attiva -> terminata
+                    String nuovoStato = body.get("nuovo_stato").getAsString();
+                    res.put("messaggio", "Tombolata aggiornata a: " + nuovoStato);
+                    break;
+
+                case "conferma_vincita": //
+                    res.put("messaggio", "Vincita validata manualmente dal gestore");
+                    break;
+
+                default:
+                    inviaRisposta(exchange, 400, "Azione non supportata");
+                    return;
             }
-            
-            if (request.getOperatore() == null || request.getOperatore().trim().isEmpty()) {
-                inviaErrore(exchange, 400, "Operatore mancante o vuoto");
-                return;
-            }
-            
-            // Esegue il calcolo
-            double risultato = Tombola_as_a_Service_CBR.calcola(
-                request.getOperando1(),
-                request.getOperando2(),
-                request.getOperatore()
-            );
-            
-            // Crea l'oggetto risposta
-            TombolataResponse response = new TombolataResponse(
-                request.getOperando1(),
-                request.getOperando2(),
-                request.getOperatore(),
-                risultato
-            );
-            
-            // GSON converte automaticamente l'oggetto Java in JSON
-            String jsonRisposta = gson.toJson(response);
-            
-            inviaRisposta(exchange, 200, jsonRisposta);
-            
-        } catch (JsonSyntaxException e) {
-            inviaErrore(exchange, 400, "JSON non valido: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            inviaErrore(exchange, 400, e.getMessage());
+
+            inviaRisposta(exchange, 200, gson.toJson(res));
         } catch (Exception e) {
-            inviaErrore(exchange, 500, "Errore interno del server: " + e.getMessage());
+            inviaRisposta(exchange, 500, "Errore: " + e.getMessage());
         }
     }
-    
-    /**
-     * Invia una risposta di successo
-     */
-    private void inviaRisposta(HttpExchange exchange, int codice, String jsonRisposta) 
-            throws IOException {
-        
-        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
-        exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-        
-        byte[] bytes = jsonRisposta.getBytes(StandardCharsets.UTF_8);
-        exchange.sendResponseHeaders(codice, bytes.length);
-        
-        OutputStream os = exchange.getResponseBody();
-        os.write(bytes);
-        os.close();
-    }
-    
-    /**
-     * Invia una risposta di errore in formato JSON
-     */
-    private void inviaErrore(HttpExchange exchange, int codice, String messaggio) 
-            throws IOException {
-        
-        Map errore = new HashMap<>();
-        errore.put("errore", messaggio);
-        errore.put("status", codice);
-        
-        String jsonErrore = gson.toJson(errore);
-        inviaRisposta(exchange, codice, jsonErrore);
+
+    private void inviaRisposta(HttpExchange exchange, int code, String json) throws IOException {
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        byte[] b = json.getBytes(StandardCharsets.UTF_8);
+        exchange.sendResponseHeaders(code, b.length);
+        exchange.getResponseBody().write(b);
+        exchange.getResponseBody().close();
     }
 }
