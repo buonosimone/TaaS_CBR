@@ -21,7 +21,7 @@ public class TombolataResponse {
     public int maxCartellePerUtente;
     public String operazioniConsentite;
  
-    // Costruttore vuoto necessario per GSON
+    
     public TombolataResponse() {
     }
  
@@ -42,13 +42,7 @@ public class TombolataResponse {
         this.operazioniConsentite = calcolaOperazioniConsentite(stato);
     }
  
-    /**
-     * Calcola la descrizione delle operazioni consentite in base allo stato corrente.
-     * Segue la tabella definita nelle specifiche TaaS.
-     *
-     * @param stato lo stato corrente della tombolata
-     * @return la descrizione delle operazioni permesse
-     */
+    
     private String calcolaOperazioniConsentite(String stato) {
         if (stato == null) return "";
         switch (stato.toUpperCase().trim()) {
